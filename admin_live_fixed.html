@@ -147,13 +147,15 @@
     }
   }
 
-  function setStatus(status) {
-    currentStatus = status;
-    const noteEl = document.getElementById("note");
-    if (!noteEl.value.trim()) {
-      if (status === "geoeffnet") noteEl.value = "Heute geöffnet.";
-      if (status === "wetterbedingt") noteEl.value = "Heute wetterbedingt geschlossen.";
-      if (status === "geschlossen") noteEl.value = "Heute kein Badebetrieb.";
+ function setStatus(status) {
+  currentStatus = status;
+
+  renderPreview({
+    status: currentStatus,
+    note: document.getElementById("note").value.trim(),
+    updatedAt: new Date().toISOString()
+  });
+}
     }
     renderPreview({
       status: currentStatus,
