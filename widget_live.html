@@ -4,40 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Freibad Status</title>
-
 <style>
   body {
     margin: 0;
     font-family: Arial, sans-serif;
   }
-
   .box {
     border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 20px;
     background: #f8fafc;
   }
-
   .title {
     font-size: 14px;
     color: #64748b;
     margin-bottom: 10px;
   }
-
   .status {
     font-size: 26px;
     font-weight: bold;
     display: flex;
     align-items: center;
     gap: 10px;
+    line-height: 1.2;
   }
-
   .dot {
     width: 14px;
     height: 14px;
     border-radius: 50%;
+    flex: 0 0 14px;
   }
-
+  .note {
+    font-size: 15px;
+    color: #475569;
+    margin-top: 8px;
+  }
   .updated {
     font-size: 12px;
     color: #64748b;
@@ -45,12 +46,11 @@
   }
 </style>
 </head>
-
 <body>
-
 <div class="box">
   <div class="title">Aktueller Badestatus</div>
   <div id="status" class="status">Lädt...</div>
+  <div id="note" class="note"></div>
   <div id="updated" class="updated"></div>
 </div>
 
@@ -74,24 +74,19 @@ async function loadStatus() {
   try {
     const res = await fetch(API_URL);
     const data = await res.json();
-
     const meta = getStatusMeta(data.status);
-
     document.getElementById("status").innerHTML = `
       <span class="dot" style="background:${meta.color}"></span>
       ${meta.text}
     `;
-
+    document.getElementById("note").innerText = (data.note || "").trim();
     document.getElementById("updated").innerText =
       "Zuletzt aktualisiert: " + formatDate(data.updatedAt);
-
   } catch (e) {
     document.getElementById("status").innerText = "Fehler beim Laden";
   }
 }
-
 loadStatus();
 </script>
-
 </body>
 </html>
