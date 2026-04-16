@@ -11,33 +11,31 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:860px;margin:0 auto;padding:24px}
+    .wrap{max-width:760px;margin:0 auto;padding:24px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;box-shadow:0 8px 24px rgba(15,23,42,.05)}
-    h1,h2,p{margin:0}
+    h1,p{margin:0}
     h1{font-size:28px;margin-bottom:8px}
     .sub{color:var(--muted);margin-bottom:22px;line-height:1.5}
     .row{margin-bottom:18px}
     label{display:block;font-weight:700;margin-bottom:8px}
-    input[type=password], textarea {
+    input[type=password]{
       width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:14px;font-size:15px;background:#fff
     }
-    textarea{min-height:92px;resize:vertical}
     .btns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
     button{border:0;border-radius:14px;padding:13px 14px;font-size:16px;font-weight:700;cursor:pointer;background:#111827;color:white}
     .ok{background:var(--ok)} .warn{background:var(--warn)} .closed{background:var(--closed)}
-    .save{margin-top:6px;min-width:180px}
-    .small{font-size:13px;color:var(--muted);line-height:1.5}
-    .preview{margin-top:24px;border:1px dashed var(--border);border-radius:16px;padding:16px;background:#fcfcfd}
-    .statusbox{display:flex;align-items:center;gap:12px}
-    .dot{width:14px;height:14px;border-radius:50%}
-    .statusline{font-size:30px;font-weight:800;line-height:1.1}
-    .note{margin-top:8px;color:var(--muted);font-size:16px}
-    .updated{margin-top:12px;font-size:13px;color:var(--muted)}
+    .save{margin-top:14px;min-width:180px}
     .hidden{display:none}
     .msg{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
     .msg.show{display:block}
     .msg.okmsg{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
     .msg.errmsg{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+    .preview{margin-top:24px;border:1px dashed var(--border);border-radius:16px;padding:16px;background:#fcfcfd}
+    .statusbox{display:flex;align-items:center;gap:12px}
+    .dot{width:14px;height:14px;border-radius:50%}
+    .statusline{font-size:30px;font-weight:800;line-height:1.1}
+    .updated{margin-top:12px;font-size:13px;color:var(--muted)}
+    .small{font-size:13px;color:var(--muted);line-height:1.5}
     @media (max-width: 700px) {
       .btns{grid-template-columns:1fr}
       .statusline{font-size:26px}
@@ -47,7 +45,7 @@
 <body>
   <div class="wrap">
     <h1>Freibadstatus – Admin</h1>
-    <p class="sub">Bitte einfach den aktuellen Status auswählen, bei Bedarf einen kurzen Hinweis ergänzen und danach speichern.</p>
+    <p class="sub">Bitte einfach den aktuellen Status auswählen und danach speichern.</p>
 
     <div class="card">
       <div id="loginBox">
@@ -68,21 +66,14 @@
           </div>
         </div>
 
-        <div class="row">
-          <label for="note">Hinweistext (optional)</label>
-          <textarea id="note" placeholder="z. B. Heute ab 15:00 Uhr geschlossen."></textarea>
-        </div>
-
         <button class="save" onclick="saveData()">Speichern</button>
         <div id="message" class="msg"></div>
 
         <div class="preview">
-          <h2 style="font-size:18px;margin-bottom:12px;">Vorschau</h2>
           <div class="statusbox">
             <div id="dot" class="dot"></div>
             <div id="statusline" class="statusline">Lädt ...</div>
           </div>
-          <div id="notePreview" class="note"></div>
           <div id="updated" class="updated"></div>
         </div>
 
@@ -120,7 +111,6 @@
     const meta = statusMeta(data.status || "geschlossen");
     document.getElementById("dot").style.background = meta.color;
     document.getElementById("statusline").textContent = meta.label;
-    document.getElementById("notePreview").textContent = (data.note || "").trim();
     document.getElementById("updated").textContent = data.updatedAt ? "Zuletzt aktualisiert: " + formatDate(data.updatedAt) : "";
   }
 
@@ -129,7 +119,6 @@
       const res = await fetch(API_URL);
       const data = await res.json();
       currentStatus = data.status || "geschlossen";
-      document.getElementById("note").value = data.note || "";
       renderPreview(data);
     } catch (e) {
       showMessage("Aktuelle Daten konnten nicht geladen werden.", true);
@@ -151,7 +140,6 @@
     currentStatus = status;
     renderPreview({
       status: currentStatus,
-      note: document.getElementById("note").value.trim(),
       updatedAt: new Date().toISOString()
     });
   }
@@ -160,7 +148,7 @@
     const params = new URLSearchParams({
       action: "update",
       status: currentStatus,
-      note: document.getElementById("note").value.trim(),
+      note: "",
       hours: ""
     });
 
@@ -171,7 +159,6 @@
         showMessage("Änderung erfolgreich gespeichert.");
         renderPreview({
           status: currentStatus,
-          note: document.getElementById("note").value.trim(),
           updatedAt: new Date().toISOString()
         });
       } else {
