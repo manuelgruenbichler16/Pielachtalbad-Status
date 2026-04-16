@@ -147,19 +147,11 @@
     }
   }
 
- function setStatus(status) {
-  currentStatus = status;
-
-  renderPreview({
-    status: currentStatus,
-    note: document.getElementById("note").value.trim(),
-    updatedAt: new Date().toISOString()
-  });
-}
-    }
+  function setStatus(status) {
+    currentStatus = status;
     renderPreview({
       status: currentStatus,
-      note: noteEl.value.trim(),
+      note: document.getElementById("note").value.trim(),
       updatedAt: new Date().toISOString()
     });
   }
