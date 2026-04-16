@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pielachtalbad Rabenstein – Status</title>
+  <style>
+    :root {
+      --bg:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+      --ok:#16a34a; --warn:#ca8a04; --closed:#475569;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:transparent;color:var(--text)}
+    .widget{max-width:100%;background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+    .topbar{height:6px;background:#6d49c8}
+    .head{padding:20px 20px 10px 20px}
+    .title{font-size:22px;font-weight:700}
+    .sub{font-size:14px;color:var(--muted);margin-top:4px}
+    .body{padding:10px 20px 20px 20px}
+    .statusbox{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:16px;padding:16px}
+    .dot{width:14px;height:14px;border-radius:50%}
+    .status{font-weight:700}
+    .note{margin-top:4px;color:var(--muted)}
+    .times{margin-top:14px;font-size:14px;line-height:1.5}
+    .updated{margin-top:14px;font-size:12px;color:var(--muted)}
+    .error{padding:18px;color:#991b1b;background:#fef2f2;border:1px solid #fecaca;border-radius:16px}
+  </style>
+</head>
+<body>
+  <div class="widget">
+    <div class="topbar"></div>
+    <div class="head">
+      <div class="title">Pielachtalbad Rabenstein</div>
+      <div class="sub">Aktueller Bade-Status</div>
+    </div>
+    <div class="body" id="app">
+      <div class="statusbox">
+        <div class="dot" id="dot"></div>
+        <div>
+          <div id="status" class="status">Lädt ...</div>
+          <div id="note" class="note"></div>
+        </div>
+      </div>
+      <div class="times" id="times"></div>
+      <div class="updated" id="updated"></div>
+    </div>
+  </div>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbxQW3sgI-zLsBi_mqbQHAzTc8owMGzlFQ232Sr-PA8d8LwyMW_iG08P2OAOTGxPQ_ei/exec";
+
+  function statusMeta(status) {
+    if (status === "geoeffnet") return {label:"Geöffnet", color:"#16a34a"};
+    if (status === "wetterbedingt") return {label:"Wetterbedingt geschlossen", color:"#ca8a04"};
+    return {label:"Geschlossen", color:"#475569"};
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    try {
+      return new Intl.DateTimeFormat("de-AT", { dateStyle:"medium", timeStyle:"short" }).format(new Date(value));
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function getTimesText(data) {
+    const base = "Reguläre Öffnungszeiten bei Schönwetter: täglich 09:00–20:00 Uhr, Mittwoch im Juli & August Nachtbaden bis 22:00 Uhr.";
+    if (data.hours && data.hours.trim()) return base + " Zusatzinfo: " + data.hours.trim();
+    return base;
+  }
+
+  async function loadStatus() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const meta = statusMeta(data.status || "geschlossen");
+
+      document.getElementById("dot").style.background = meta.color;
+      document.getElementById("status").textContent = meta.label;
+      document.getElementById("note").textContent = data.note || "";
+      document.getElementById("times").textContent = getTimesText(data);
+      document.getElementById("updated").textContent = data.updatedAt ? "Zuletzt aktualisiert: " + formatDate(data.updatedAt) : "";
+    } catch (e) {
+      document.getElementById("app").innerHTML = '<div class="error">Der Freibadstatus konnte derzeit nicht geladen werden.</div>';
+    }
+  }
+
+  loadStatus();
+  setInterval(loadStatus, 60000);
+</script>
+</body>
+</html>
